@@ -1,6 +1,7 @@
 import { defineConfig } from "eslint/config";
 import js from "@eslint/js";
 import globals from "globals";
+import importPlugin from "eslint-plugin-import";
 
 export default defineConfig([
   {
@@ -10,9 +11,21 @@ export default defineConfig([
         ...globals.node,
       },
     },
-    plugins: { js },
-    extends: ["js/recommended"],
+    plugins: {
+      js,
+      import: importPlugin,
+    },
+    settings: {
+      "import/resolver": {
+        alias: {
+          map: [["@", "./"]],
+          extensions: [".js"],
+        },
+      },
+    },
     rules: {
+      ...importPlugin.configs.recommended.rules,
+
       "no-unused-vars": "error",
       "no-undef": "error",
       "no-console": "off",
@@ -22,6 +35,16 @@ export default defineConfig([
       "no-return-await": "error",
       "no-eval": "error",
       "no-implied-eval": "error",
+
+      "import/order": [
+        "warn",
+        {
+          "groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
+          "newlines-between": "always",
+        },
+      ],
+      "import/newline-after-import": "warn",
+      "import/no-duplicates": "warn",
     },
   },
 ]);
