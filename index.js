@@ -3,10 +3,15 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
 
+import connectDB from "./config/db.js";
+
 dotenv.config();
 
-const app = express();
 const PORT = process.env.EXPRESS_PORT;
+
+const app = express();
+
+await connectDB();
 
 app.use(cors());
 app.use(bodyParser.json());
