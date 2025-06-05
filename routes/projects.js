@@ -30,4 +30,23 @@ projectsRouter.get("/:projectId", async (req, res) => {
   }
 });
 
+projectsRouter.post("/", async (req, res) => {
+  try {
+    const ownerId = "1234"; // 임시처리
+    const currentDate = new Date();
+
+    const newProject = await Project.create({
+      title: currentDate,
+      ownerId,
+      createdAt: currentDate,
+      updatedAt: currentDate,
+    });
+
+    res.status(200).json(newProject);
+  } catch (error) {
+    console.error("프로젝트 생성 중 에러 발생", error);
+    res.status(500).json({ message: "서버 에러로 데이터를 저장하지 못했습니다." });
+  }
+});
+
 export default projectsRouter;
