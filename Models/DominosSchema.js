@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-import { OBJECT_NAMES, COLLIDERS, GROUP_NAMES } from "../constants/index.js";
+import { OBJECT_NAMES, COLLIDERS, GROUP_NAMES, TYPE } from "../constants/index.js";
 
 const objectInfoSchema = new Schema({
   objectName: {
@@ -8,21 +8,26 @@ const objectInfoSchema = new Schema({
     enum: OBJECT_NAMES,
     required: true,
   },
-  thumbnailPath: {
+  thumbnail: {
     type: String,
     required: true,
   },
-  glbPath: {
+  model: {
     type: String,
     required: true,
   },
-  soundPath: {
+  sound: {
     type: String,
     required: true,
   },
   colliders: {
     type: String,
     enum: COLLIDERS,
+    required: true,
+  },
+  type: {
+    type: String,
+    enum: TYPE,
     required: true,
   },
   groupName: {
@@ -32,7 +37,29 @@ const objectInfoSchema = new Schema({
   },
 });
 
+const projectSchema = new Schema({
+  title: {
+    type: String,
+  },
+  ownerId: {
+    type: String,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    required: true,
+  },
+  updatedAt: {
+    type: Date,
+    required: true,
+  },
+});
+
 const DominosSchema = new Schema({
+  projectId: {
+    type: String,
+    required: false,
+  },
   position: {
     type: [Number],
     required: true,
@@ -48,13 +75,12 @@ const DominosSchema = new Schema({
     },
   },
   opacity: { type: Number, required: true },
-  color: { type: String, required: true },
+  color: { type: String },
   objectInfo: {
     type: objectInfoSchema,
     required: true,
   },
 });
 
-const dominosSchema = mongoose.model("dominos", DominosSchema);
-
-export default dominosSchema;
+export const Domino = mongoose.model("Domino", DominosSchema);
+export const Project = mongoose.model("Project", projectSchema);

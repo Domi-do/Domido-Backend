@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 
 import connectDB from "./config/db.js";
 import dominosRouter from "./routes/dominos.js";
+import projectsRouter from "./routes/projects.js";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.get("/", (req, res) => {
   res.send("hello");
 });
 
+app.use("/projects", projectsRouter);
 app.use("/dominos", dominosRouter);
 
 app.listen(PORT, () => {
