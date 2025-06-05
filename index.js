@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 
 import connectDB from "./config/db.js";
 import dominosRouter from "./routes/dominos.js";
-import authRouter from "./routes/auth.js";
+import authRouter from "./routes/user.js";
 
 dotenv.config();
 

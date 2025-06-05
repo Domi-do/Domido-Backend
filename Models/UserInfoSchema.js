@@ -8,6 +8,6 @@ const userInfoSchema = new Schema({
   },
 });
 
-const userSchema = mongoose.model("auth", userInfoSchema);
+const User = mongoose.model("user", userInfoSchema);
 
-export default userSchema;
+export default User;

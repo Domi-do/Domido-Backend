@@ -1,37 +1,9 @@
 import express from "express";
-import jwt from "jsonwebtoken";
 
-import userSchema from "../Models/UserInfoSchema.js";
+import User from "../Models/UserInfoSchema.js";
+import { generateAccessToken, generateRefreshToken } from "../utills/utills.js";
 
 const router = express.Router();
-
-function generateAccessToken(payload) {
-  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "10m" });
-}
-
-function generateRefreshToken(payload) {
-  return jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
-}
-
-export const verifyToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "인증 토큰이 없습니다." });
-  }
-
-  const token = authHeader.split(" ")[1];
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("decoded", decoded);
-    req.user = decoded;
-    next();
-  } catch (err) {
-    console.error("로그인 처리 실패:", err.message);
-    return res.status(403).json({ message: "유효하지 않은 토큰입니다." });
-  }
-};
 
 async function getKakaoAccessToken(code) {
   const params = new URLSearchParams();
@@ -92,13 +64,13 @@ router.post("/login", async (req, res) => {
 
     const kakaoId = userInfo.id;
 
-    let user = await userSchema.findOne({ kakaoId });
+    let user = await User.findOne({ kakaoId });
     if (!user) {
-      user = await userSchema.create({ kakaoId });
+      user = await User.create({ kakaoId });
     }
 
-    const accessToken = generateAccessToken({ userId: user._id });
-    const refreshToken = generateRefreshToken({ userId: user._id });
+    const accessToken = generateAccessToken({ userId: user.kakaoId });
+    const refreshToken = generateRefreshToken({ userId: user.kakaoId });
 
     res
       .cookie("refreshToken", refreshToken, {
