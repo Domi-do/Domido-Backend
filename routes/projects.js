@@ -1,6 +1,6 @@
 import express from "express";
 
-import { Project } from "../Models/DominosSchema.js";
+import { Project, Domino } from "../Models/DominosSchema.js";
 
 const projectsRouter = express.Router();
 
@@ -46,6 +46,24 @@ projectsRouter.post("/", async (req, res) => {
   } catch (error) {
     console.error("프로젝트 생성 중 에러 발생", error);
     res.status(500).json({ message: "서버 에러로 데이터를 저장하지 못했습니다." });
+  }
+});
+
+projectsRouter.delete("/:projectId", async (req, res) => {
+  try {
+    const { projectId } = req.params;
+
+    await Project.deleteOne({ _id: projectId });
+    const deletedDominos = await Domino.deleteMany({ projectId });
+
+    res.status(200).json({
+      message: "프로젝트 및 연결된 도미노가 성공적으로 삭제되었습니다.",
+      deletedProjectId: projectId,
+      deletedDominoCount: deletedDominos.deletedCount,
+    });
+  } catch (error) {
+    console.error("프로젝트 삭제 중 에러 발생", error);
+    res.status(500).json({ message: "서버 에러로 데이터를 삭제하지 못했습니다." });
   }
 });
 
