@@ -15,3 +15,5 @@ export const OBJECT_NAMES = [
 export const COLLIDERS = ["cuboid", "trimesh", "ball", "hull"];
 
 export const GROUP_NAMES = ["STATIC_OBJECTS", "DYNAMIC_OBJECTS"];
+
+export const TYPE = ["dynamic", "fixed"];

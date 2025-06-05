@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 
 import connectDB from "./config/db.js";
 import dominosRouter from "./routes/dominos.js";
+import projectsRouter from "./routes/projects.js";
 import authRouter from "./routes/user.js";
 
 dotenv.config();
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
   res.send("hello");
 });
 
+app.use("/projects", projectsRouter);
 app.use("/dominos", dominosRouter);
 app.use("/auth", authRouter);
 
