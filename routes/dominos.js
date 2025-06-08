@@ -1,13 +1,13 @@
 import express from "express";
 
-import { Domino } from "../Models/DominosSchema.js";
+import { DominoModel } from "../Models/DominosSchema.js";
 
 const dominosRouter = express.Router();
 
 dominosRouter.get("/:projectId", async (req, res) => {
   try {
     const { projectId } = req.params;
-    const dominos = await Domino.find({ projectId }).lean();
+    const dominos = await DominoModel.find({ projectId }).lean();
 
     return res.status(200).json(dominos);
   } catch (error) {
@@ -25,7 +25,7 @@ dominosRouter.post("/:projectId", async (req, res) => {
       return res.status(400).json({ message: "유효하지 않은 요청입니다." });
     }
 
-    await Domino.deleteMany({ projectId });
+    await DominoModel.deleteMany({ projectId });
 
     if (dominos.length === 0) {
       return res.status(200).json([]);
@@ -36,9 +36,9 @@ dominosRouter.post("/:projectId", async (req, res) => {
       projectId,
     }));
 
-    await Domino.insertMany(newDominos);
+    await DominoModel.insertMany(newDominos);
 
-    const finalDominos = await Domino.find({ projectId }).lean();
+    const finalDominos = await DominoModel.find({ projectId }).lean();
     return res.status(200).json(finalDominos);
   } catch (error) {
     console.error("도미노 처리 중 에러 발생:", error);

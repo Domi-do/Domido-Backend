@@ -82,5 +82,5 @@ const DominosSchema = new Schema({
   },
 });
 
-export const Domino = mongoose.model("Domino", DominosSchema);
-export const Project = mongoose.model("Project", projectSchema);
+export const DominoModel = mongoose.model("DominoModel", DominosSchema);
+export const ProjectModel = mongoose.model("ProjectModel", projectSchema);
