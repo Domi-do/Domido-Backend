@@ -37,6 +37,7 @@ async function getKakaoUserInfo(accessToken) {
     headers: {
       "Authorization": `Bearer ${accessToken}`,
       "Content-Type": "application/json",
+      "credentials": "include",
     },
   });
 
@@ -70,8 +71,8 @@ router.post("/login", async (req, res) => {
       user = await User.create({ kakaoId });
     }
 
-    const accessToken = generateAccessToken({ userId: user.kakaoId });
-    const refreshToken = generateRefreshToken({ userId: user.kakaoId });
+    const accessToken = generateAccessToken({ userId: user.kakaoId, tokenType: "access" });
+    const refreshToken = generateRefreshToken({ userId: user.kakaoId, tokenType: "refresh" });
 
     res
       .cookie("refreshToken", refreshToken, {
@@ -84,7 +85,8 @@ router.post("/login", async (req, res) => {
       .json({
         message: "로그인 성공",
         token: accessToken,
-        user: { id: user._id },
+        userID: user._id,
+        refreshToken: refreshToken,
       });
   } catch (err) {
     console.error("로그인 처리 실패:", err.message);
