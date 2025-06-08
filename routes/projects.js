@@ -1,6 +1,7 @@
 import express from "express";
 
-import { ProjectModel, DominoModel } from "../Models/DominosSchema.js";
+import { ProjectModel } from "../Models/ProjectSchema.js";
+import { DominoModel } from "../Models/DominosSchema.js";
 
 const projectsRouter = express.Router();
 
