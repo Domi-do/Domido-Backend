@@ -68,4 +68,26 @@ projectsRouter.delete("/:projectId", async (req, res) => {
   }
 });
 
+projectsRouter.patch("/:projectId", async (req, res) => {
+  const { title } = req.body;
+  const { projectId } = req.params;
+
+  if (!title) {
+    return res.status(400).json({ message: "프로젝트 제목이 필요합니다." });
+  }
+
+  try {
+    const updatedProject = await ProjectModel.findByIdAndUpdate(projectId, { title }, { new: true });
+
+    if (!updatedProject) {
+      return res.status(404).json({ message: "프로젝트가 없습니다." });
+    }
+
+    return res.status(200).json(updatedProject);
+  } catch (err) {
+    console.error("프로젝트 수정 실패:", err);
+    return res.status(500).json({ message: "서버 에러 입니다." });
+  }
+});
+
 export default projectsRouter;
