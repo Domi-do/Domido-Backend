@@ -63,8 +63,8 @@ router.post("/login", async (req, res) => {
     if (!userInfo || !userInfo.id) {
       throw new Error("카카오 사용자 정보가 없습니다.");
     }
-
     const kakaoId = userInfo.id;
+    const userNickname = userInfo.properties.nickname;
 
     let user = await User.findOne({ kakaoId });
 
@@ -72,7 +72,7 @@ router.post("/login", async (req, res) => {
     const refreshToken = generateRefreshToken({ userId: kakaoId, tokenType: "refresh" });
 
     if (!user) {
-      user = await User.create({ kakaoId, accessToken, refreshToken });
+      user = await User.create({ kakaoId, userNickname, accessToken, refreshToken });
     } else {
       user.accessToken = accessToken;
       user.refreshToken = refreshToken;
@@ -84,6 +84,7 @@ router.post("/login", async (req, res) => {
       token: accessToken,
       userID: user._id,
       refreshToken: refreshToken,
+      userNickname,
       kakaoAccessToken: kakaoAccessToken,
     });
   } catch (err) {
