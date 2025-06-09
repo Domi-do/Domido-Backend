@@ -8,6 +8,7 @@ export const OBJECT_NAMES = [
   "stairs",
   "beachBall",
   "cannon",
+  "car",
   "pokeball",
   "soccerFootball",
   "lightbulb",
