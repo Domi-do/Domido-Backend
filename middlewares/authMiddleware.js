@@ -3,8 +3,6 @@ import jwt from "jsonwebtoken";
 import { refreshAccessToken } from "../utills/utills.js";
 
 export const verifyAccessToken = async (req, res, next) => {
-  console.log("verifyAccessToken called");
-
   try {
     const accessToken = req.headers.authorization?.split(" ")[1];
 
@@ -25,8 +23,6 @@ export const verifyAccessToken = async (req, res, next) => {
 };
 
 async function tryRefreshLogin(req, res, next) {
-  console.log("tryRefreshLogin called");
-
   try {
     const refreshToken = req.headers["refresh-token"]?.split(" ")[1];
 
