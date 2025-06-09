@@ -45,12 +45,17 @@ const socketSetup = (server) => {
       });
     });
 
+    socket.on("clear cursor", ({ projectId }) => {
+      io.to(`project:${projectId}`).emit("other cursor clear", { userID });
+    });
+
     socket.on("disconnect", () => {
       const projectId = socket.data.projectId;
       if (projectId) {
         const room = `project:${projectId}`;
         io.to(room).emit("user left", {
           message: `${userNickname}님이 방을 떠났습니다.`,
+          userID,
         });
       }
     });
