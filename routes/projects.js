@@ -1,12 +1,13 @@
 import express from "express";
 
-import { Project, Domino } from "../Models/DominosSchema.js";
+import { ProjectModel } from "../Models/ProjectSchema.js";
+import { DominoModel } from "../Models/DominosSchema.js";
 
 const projectsRouter = express.Router();
 
 projectsRouter.get("/", async (req, res) => {
   try {
-    const projects = await Project.find();
+    const projects = await ProjectModel.find();
     projects.title = req.body;
     res.status(200).json(projects);
   } catch (error) {
@@ -18,7 +19,7 @@ projectsRouter.get("/", async (req, res) => {
 projectsRouter.get("/:projectId", async (req, res) => {
   try {
     const { projectId } = req.params;
-    const project = await Project.findOne({ _id: projectId });
+    const project = await ProjectModel.findOne({ _id: projectId });
 
     if (!project) {
       return res.status(404).json({ message: "일치하는 프로젝트가 없습니다." });
@@ -36,7 +37,7 @@ projectsRouter.post("/", async (req, res) => {
     const ownerId = "1234"; // 임시처리
     const currentDate = new Date();
 
-    const newProject = await Project.create({
+    const newProject = await ProjectModel.create({
       title: req.body.title,
       ownerId,
       createdAt: currentDate,
@@ -54,8 +55,8 @@ projectsRouter.delete("/:projectId", async (req, res) => {
   try {
     const { projectId } = req.params;
 
-    await Project.deleteOne({ _id: projectId });
-    const deletedDominos = await Domino.deleteMany({ projectId });
+    await ProjectModel.deleteOne({ _id: projectId });
+    const deletedDominos = await DominoModel.deleteMany({ projectId });
 
     res.status(200).json({
       message: "프로젝트 및 연결된 도미노가 성공적으로 삭제되었습니다.",
@@ -77,7 +78,11 @@ projectsRouter.patch("/:projectId", async (req, res) => {
   }
 
   try {
-    const updatedProject = await Project.findByIdAndUpdate(projectId, { title }, { new: true });
+    const updatedProject = await ProjectModel.findByIdAndUpdate(
+      projectId,
+      { title },
+      { new: true },
+    );
 
     if (!updatedProject) {
       return res.status(404).json({ message: "프로젝트가 없습니다." });
