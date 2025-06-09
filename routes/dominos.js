@@ -1,8 +1,11 @@
 import express from "express";
 
 import { DominoModel } from "../Models/DominosSchema.js";
+import { verifyAccessToken } from "../middlewares/authMiddleware.js";
 
 const dominosRouter = express.Router();
+
+dominosRouter.use(verifyAccessToken);
 
 dominosRouter.get("/:projectId", async (req, res) => {
   try {

@@ -2,13 +2,17 @@ import express from "express";
 
 import { ProjectModel } from "../Models/ProjectSchema.js";
 import { DominoModel } from "../Models/DominosSchema.js";
+import { verifyAccessToken } from "../middlewares/authMiddleware.js";
 
 const projectsRouter = express.Router();
 
+projectsRouter.use(verifyAccessToken);
+
 projectsRouter.get("/", async (req, res) => {
   try {
-    const projects = await ProjectModel.find();
-    projects.title = req.body;
+    const user = req.user;
+    const projects = await ProjectModel.find({ ownerId: user.userId });
+
     res.status(200).json(projects);
   } catch (error) {
     console.error("프로젝트 전체 조회 중 에러 발생", error);
@@ -34,12 +38,12 @@ projectsRouter.get("/:projectId", async (req, res) => {
 
 projectsRouter.post("/", async (req, res) => {
   try {
-    const ownerId = "1234"; // 임시처리
+    const user = req.user;
     const currentDate = new Date();
 
     const newProject = await ProjectModel.create({
       title: req.body.title,
-      ownerId,
+      ownerId: user.userId,
       createdAt: currentDate,
       updatedAt: currentDate,
     });
