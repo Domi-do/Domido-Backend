@@ -8,6 +8,7 @@ const projectsRouter = express.Router();
 projectsRouter.get("/", async (req, res) => {
   try {
     const projects = await ProjectModel.find();
+    projects.title = req.body;
     res.status(200).json(projects);
   } catch (error) {
     console.error("프로젝트 전체 조회 중 에러 발생", error);
@@ -37,7 +38,7 @@ projectsRouter.post("/", async (req, res) => {
     const currentDate = new Date();
 
     const newProject = await ProjectModel.create({
-      title: currentDate,
+      title: req.body.title,
       ownerId,
       createdAt: currentDate,
       updatedAt: currentDate,
@@ -65,6 +66,32 @@ projectsRouter.delete("/:projectId", async (req, res) => {
   } catch (error) {
     console.error("프로젝트 삭제 중 에러 발생", error);
     res.status(500).json({ message: "서버 에러로 데이터를 삭제하지 못했습니다." });
+  }
+});
+
+projectsRouter.patch("/:projectId", async (req, res) => {
+  const { title } = req.body;
+  const { projectId } = req.params;
+
+  if (!title) {
+    return res.status(400).json({ message: "프로젝트 제목이 필요합니다." });
+  }
+
+  try {
+    const updatedProject = await ProjectModel.findByIdAndUpdate(
+      projectId,
+      { title },
+      { new: true },
+    );
+
+    if (!updatedProject) {
+      return res.status(404).json({ message: "프로젝트가 없습니다." });
+    }
+
+    return res.status(200).json(updatedProject);
+  } catch (err) {
+    console.error("프로젝트 수정 실패:", err);
+    return res.status(500).json({ message: "서버 에러 입니다." });
   }
 });
 
