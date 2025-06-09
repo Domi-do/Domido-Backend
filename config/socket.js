@@ -22,16 +22,20 @@ const socketSetup = (server) => {
       });
     });
 
-    socket.on("update cursor position", ({ projectId, objectInfo, position, selectedColor }) => {
-      const room = `project:${projectId}`;
-      io.to(room).emit("cursor position update", {
-        userNickname,
-        objectInfo,
-        position,
-        userID,
-        selectedColor,
-      });
-    });
+    socket.on(
+      "update cursor position",
+      ({ projectId, objectInfo, position, selectedColor, rotationY }) => {
+        const room = `project:${projectId}`;
+        io.to(room).emit("cursor position update", {
+          userNickname,
+          objectInfo,
+          position,
+          userID,
+          selectedColor,
+          rotationY,
+        });
+      },
+    );
 
     socket.on("update domino", ({ projectId, dominos }) => {
       const room = `project:${projectId}`;
