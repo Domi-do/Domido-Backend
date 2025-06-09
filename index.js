@@ -1,3 +1,5 @@
+import http from "http";
+
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -12,11 +14,11 @@ import socketSetup from "./config/socket.js";
 dotenv.config();
 
 const PORT = process.env.EXPRESS_PORT;
-
 const app = express();
+const server = http.createServer(app);
 
 await connectDB();
-socketSetup();
+socketSetup(server);
 
 app.use(
   cors({
@@ -24,6 +26,7 @@ app.use(
     credentials: true,
   }),
 );
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -35,6 +38,6 @@ app.use("/projects", projectsRouter);
 app.use("/dominos", dominosRouter);
 app.use("/auth", authRouter);
 
-app.listen(PORT, () => {
-  console.log(`✅ App listening on port ${PORT}`);
+server.listen(PORT, () => {
+  console.log(`App + Socket.IO listening on port ${PORT}`);
 });
