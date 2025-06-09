@@ -8,8 +8,11 @@ export const OBJECT_NAMES = [
   "stairs",
   "beachBall",
   "cannon",
+  "car",
   "pokeball",
   "soccerFootball",
+  "lightbulb",
+  "bumper",
 ];
 
 export const COLLIDERS = ["cuboid", "trimesh", "ball", "hull"];
