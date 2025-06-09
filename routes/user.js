@@ -1,4 +1,5 @@
 import express from "express";
+import jwt from "jsonwebtoken";
 
 import User from "../Models/UserInfoSchema.js";
 import { generateAccessToken, generateRefreshToken } from "../utills/utills.js";
@@ -36,6 +37,7 @@ async function getKakaoUserInfo(accessToken) {
     headers: {
       "Authorization": `Bearer ${accessToken}`,
       "Content-Type": "application/json",
+      "credentials": "include",
     },
   });
 
@@ -69,8 +71,8 @@ router.post("/login", async (req, res) => {
       user = await User.create({ kakaoId });
     }
 
-    const accessToken = generateAccessToken({ userId: user.kakaoId });
-    const refreshToken = generateRefreshToken({ userId: user.kakaoId });
+    const accessToken = generateAccessToken({ userId: user.kakaoId, tokenType: "access" });
+    const refreshToken = generateRefreshToken({ userId: user.kakaoId, tokenType: "refresh" });
 
     res
       .cookie("refreshToken", refreshToken, {
@@ -83,11 +85,39 @@ router.post("/login", async (req, res) => {
       .json({
         message: "로그인 성공",
         token: accessToken,
-        user: { id: user._id },
+        userID: user._id,
+        refreshToken: refreshToken,
       });
   } catch (err) {
     console.error("로그인 처리 실패:", err.message);
     res.status(500).json({ message: "카카오 로그인 실패", detail: err.message });
+  }
+});
+
+router.post("/refresh", async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    return res.status(401).json({ message: "리프레시 토큰이 없습니다." });
+  }
+
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+    const user = await User.findOne({ kakaoId: decoded.userId });
+    if (!user) {
+      return res.status(404).json({ message: "사용자 없음" });
+    }
+
+    const newAccessToken = generateAccessToken({ userId: user.kakaoId });
+
+    return res.status(200).json({
+      message: "새 액세스 토큰 발급 완료",
+      token: newAccessToken,
+    });
+  } catch (err) {
+    console.err(err);
+    return res.status(403).json({ message: "리프레시 토큰이 유효하지 않습니다" });
   }
 });
 
