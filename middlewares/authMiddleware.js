@@ -39,7 +39,7 @@ async function tryRefreshLogin(req, res, next) {
     req.user = decoded;
     next();
   } catch (error) {
-    res.status(403).json({ message: "토큰이 유효하지 않습니다." });
-    throw new Error(`토큰 재발급 실패: ${error.message}`);
+    res.status(403).json({ message: "리프레쉬 토큰이 유효하지 않습니다." });
+    throw new Error(`액세스 토큰 재발급 실패: ${error.message}`);
   }
 }
