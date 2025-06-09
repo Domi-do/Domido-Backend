@@ -23,7 +23,6 @@ const objectInfoSchema = new Schema({
   colliders: {
     type: String,
     enum: COLLIDERS,
-    required: true,
   },
   type: {
     type: String,
