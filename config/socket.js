@@ -13,8 +13,17 @@ const socketSetup = (server) => {
 
     socket.on("join project room", ({ projectId }) => {
       const room = `project:${projectId}`;
-      socket.join(room);
+      const roomInfo = io.sockets.adapter.rooms.get(room);
+      const numberOfUsers = roomInfo ? roomInfo.size : 0;
 
+      if (numberOfUsers >= 5) {
+        socket.emit("room full", {
+          message: "방 인원 수가 초과되어 입장할 수 없습니다.",
+        });
+        return;
+      }
+
+      socket.join(room);
       socket.data.projectId = projectId;
 
       io.to(room).emit("user joined", {
