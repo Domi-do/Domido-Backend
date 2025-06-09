@@ -22,13 +22,14 @@ const socketSetup = (server) => {
       });
     });
 
-    socket.on("update cursor position", ({ projectId, objectInfo, position }) => {
+    socket.on("update cursor position", ({ projectId, objectInfo, position, selectedColor }) => {
       const room = `project:${projectId}`;
       io.to(room).emit("cursor position update", {
         userNickname,
         objectInfo,
         position,
         userID,
+        selectedColor,
       });
     });
 
