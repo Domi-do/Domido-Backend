@@ -15,6 +15,8 @@ const socketSetup = (server) => {
       const room = `project:${projectId}`;
       socket.join(room);
 
+      socket.data.projectId = projectId;
+
       io.to(room).emit("user joined", {
         message: `${userNickname}님이 방에 입장했습니다.`,
       });
@@ -36,6 +38,16 @@ const socketSetup = (server) => {
         userNickname,
         dominos,
       });
+    });
+
+    socket.on("disconnect", () => {
+      const projectId = socket.data.projectId;
+      if (projectId) {
+        const room = `project:${projectId}`;
+        io.to(room).emit("user left", {
+          message: `${userNickname}님이 방을 떠났습니다.`,
+        });
+      }
     });
   });
 };
