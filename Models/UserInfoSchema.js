@@ -6,6 +6,8 @@ const userInfoSchema = new Schema({
     required: true,
     unique: true,
   },
+  refreshToken: { type: String, default: null },
+  accessToken: { type: String, default: null },
 });
 
 const User = mongoose.model("user", userInfoSchema);
