@@ -9,8 +9,7 @@ const socketSetup = (server) => {
   });
 
   io.on("connection", (socket) => {
-    const userNickname = socket.handshake.query.userNickname;
-    console.log(`👤 ${userNickname} 연결됨 (소켓 ID: ${socket.id})`);
+    const { userNickname, userID } = socket.handshake.query;
 
     socket.on("join project room", ({ projectId }) => {
       const room = `project:${projectId}`;
@@ -27,6 +26,7 @@ const socketSetup = (server) => {
         userNickname,
         objectInfo,
         position,
+        userID,
       });
     });
 
