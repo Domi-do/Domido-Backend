@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import cookieParser from "cookie-parser";
 
 import connectDB from "./config/db.js";
 import dominosRouter from "./routes/dominos.js";
@@ -23,7 +22,6 @@ app.use(
   }),
 );
 app.use(express.json());
-app.use(cookieParser());
 
 app.get("/", (req, res) => {
   res.send("hello");
