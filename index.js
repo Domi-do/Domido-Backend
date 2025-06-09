@@ -7,6 +7,7 @@ import connectDB from "./config/db.js";
 import dominosRouter from "./routes/dominos.js";
 import projectsRouter from "./routes/projects.js";
 import authRouter from "./routes/user.js";
+import socketSetup from "./config/socket.js";
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ const PORT = process.env.EXPRESS_PORT;
 const app = express();
 
 await connectDB();
+socketSetup();
 
 app.use(
   cors({
