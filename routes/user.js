@@ -37,7 +37,6 @@ async function getKakaoUserInfo(accessToken) {
     headers: {
       "Authorization": `Bearer ${accessToken}`,
       "Content-Type": "application/json",
-      "credentials": "include",
     },
   });
 
@@ -52,6 +51,7 @@ async function getKakaoUserInfo(accessToken) {
 
 router.post("/login", async (req, res) => {
   const { code } = req.body;
+
   if (!code) {
     return res.status(400).json({ message: "인가 코드가 없습니다." });
   }
@@ -67,27 +67,25 @@ router.post("/login", async (req, res) => {
     const kakaoId = userInfo.id;
 
     let user = await User.findOne({ kakaoId });
+
+    const accessToken = generateAccessToken({ userId: kakaoId, tokenType: "access" });
+    const refreshToken = generateRefreshToken({ userId: kakaoId, tokenType: "refresh" });
+
     if (!user) {
-      user = await User.create({ kakaoId });
+      user = await User.create({ kakaoId, accessToken, refreshToken });
+    } else {
+      user.accessToken = accessToken;
+      user.refreshToken = refreshToken;
+      await user.save();
     }
 
-    const accessToken = generateAccessToken({ userId: user.kakaoId, tokenType: "access" });
-    const refreshToken = generateRefreshToken({ userId: user.kakaoId, tokenType: "refresh" });
-
-    res
-      .cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: false,
-        sameSite: "lax",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      })
-      .status(200)
-      .json({
-        message: "로그인 성공",
-        token: accessToken,
-        userID: user._id,
-        refreshToken: refreshToken,
-      });
+    res.status(200).json({
+      message: "로그인 성공",
+      token: accessToken,
+      userID: user._id,
+      refreshToken: refreshToken,
+      kakaoAccessToken: kakaoAccessToken,
+    });
   } catch (err) {
     console.error("로그인 처리 실패:", err.message);
     res.status(500).json({ message: "카카오 로그인 실패", detail: err.message });
@@ -95,12 +93,11 @@ router.post("/login", async (req, res) => {
 });
 
 router.post("/refresh", async (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
+  const { refreshToken } = req.body;
 
   if (!refreshToken) {
     return res.status(401).json({ message: "리프레시 토큰이 없습니다." });
   }
-
   try {
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
@@ -118,6 +115,34 @@ router.post("/refresh", async (req, res) => {
   } catch (err) {
     console.err(err);
     return res.status(403).json({ message: "리프레시 토큰이 유효하지 않습니다" });
+  }
+});
+
+router.post("/logout", async (req, res) => {
+  const { accessToken } = req.body;
+
+  if (!accessToken) {
+    return res.status(400).json({ message: "리프레시 토큰 없음" });
+  }
+
+  const response = await fetch("https://kapi.kakao.com/v1/user/unlink", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+    },
+  });
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`카카오 로그아웃 실패: ${error}`);
+  }
+
+  try {
+    await User.deleteOne({ accessToken: accessToken });
+    res.status(200).json({ message: "로그아웃 성공" });
+  } catch (err) {
+    console.error("토큰 삭제 실패", err);
+    res.status(500).json({ message: "서버 에러" });
   }
 });
 
