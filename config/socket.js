@@ -58,6 +58,10 @@ const socketSetup = (server) => {
       io.to(`project:${projectId}`).emit("other cursor clear", { userID });
     });
 
+    socket.on("clear domino", ({ projectId }) => {
+      io.to(`project:${projectId}`).emit("domino cleared", { projectId });
+    });
+
     socket.on("disconnect", () => {
       const projectId = socket.data.projectId;
       if (projectId) {
