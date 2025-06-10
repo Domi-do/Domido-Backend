@@ -8,7 +8,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -25,8 +24,8 @@ jobs:
           EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
           ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
-            cd ~/Domido-Backend
-            git pull origin simulation-sync-and-restrict
-            npm install --production
-            pm2 restart all
-          EOF
+cd ~/Domido-Backend
+git pull origin simulation-sync-and-restrict
+npm install --production
+pm2 restart all
+EOF
