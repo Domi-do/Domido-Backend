@@ -21,9 +21,29 @@ jobs:
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
-          ssh -o StrictHostKeyChecking=no -t "$EC2_USER@$EC2_HOST" << 'EOF'
-            sudo chown -R ubuntu:52.78.216.181 ~/Domido-Backend
+          ssh -o StrictHostKeyChecking=no "$EC2_USER@$EC2_HOST" << 'EOF'
+            
+            if [ ! -d "~/Domido-Backend" ]; then
+              echo "디렉토리가 존재하지 않습니다. 클론을 진행합니다."
+              git clone https://github.com/your-username/Domido-Backend.git ~/Domido-Backend
+            fi
+            
+            sudo chown -R ubuntu:ubuntu ~/Domido-Backend
+            
             cd ~/Domido-Backend
+            
+            echo "현재 브랜치: $(git branch --show-current)"
+            
+            git status
+            git fetch origin
+            
+            if ! git diff-index --quiet HEAD --; then
+              echo "로컬 변경사항을 stash합니다."
+              git stash
+            fi
+            
+            git checkout simulation-sync-and-restrict
             git pull origin simulation-sync-and-restrict
             
+            echo "배포가 완료되었습니다."
           EOF
