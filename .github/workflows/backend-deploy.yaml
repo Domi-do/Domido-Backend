@@ -23,9 +23,12 @@ jobs:
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
-          ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
+          ssh -o StrictHostKeyChecking=no -t $EC2_USER@$EC2_HOST << 'EOF'
+            git config --global --add safe.directory /home/$EC2_USER/Domido-Backend
+            source ~/.bashrc
+
             cd ~/Domido-Backend
             git pull origin simulation-sync-and-restrict
             npm install --production
-            pm2 restart all
+            pm2 restart all || pm2 start index.js
           EOF
