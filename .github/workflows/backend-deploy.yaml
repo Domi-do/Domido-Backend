@@ -29,5 +29,9 @@ jobs:
             git status
             git fetch origin
             git pull origin feat/simulation-sync-and-restrict
+            
+            npm install
+            npm install -g pm2
+            
             pm2 restart all || pm2 start index.js
           EOF
