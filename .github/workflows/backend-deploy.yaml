@@ -28,5 +28,5 @@ jobs:
             cd ~/Domido-Backend
             git status
             git fetch origin
-            git pull origin simulation-sync-and-restrict          
+            git pull origin feat/simulation-sync-and-restrict
           EOF
