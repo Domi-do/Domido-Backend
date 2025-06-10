@@ -26,5 +26,7 @@ jobs:
             sudo chown -R ubuntu:ubuntu ~/Domido-Backend
 
             cd ~/Domido-Backend
-                      
+            git status
+            git fetch origin
+            git pull origin simulation-sync-and-restrict          
           EOF
