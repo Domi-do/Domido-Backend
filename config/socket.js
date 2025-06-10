@@ -62,6 +62,10 @@ const socketSetup = (server) => {
       io.to(`project:${projectId}`).emit("domino cleared", { projectId });
     });
 
+    socket.on("reset domino", ({ projectId }) => {
+      io.to(`project:${projectId}`).emit("reset domino");
+    });
+
     socket.on("disconnect", () => {
       const projectId = socket.data.projectId;
       if (projectId) {
