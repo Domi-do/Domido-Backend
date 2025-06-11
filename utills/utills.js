@@ -17,7 +17,7 @@ export const refreshAccessToken = async (refreshToken) => {
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     const user = await User.findOne({ kakaoId: decoded.userId });
 
-    if (!user) throw new Error("사용자 없음");
+    if (!user) throw new Error("사용자가 없습니다");
 
     const newAccessToken = generateAccessToken({ userId: user.kakaoId });
     return newAccessToken;

@@ -16,7 +16,7 @@ projectsRouter.get("/", async (req, res) => {
     res.status(200).json(projects);
   } catch (error) {
     console.error("프로젝트 전체 조회 중 에러 발생", error);
-    res.status(500).json({ message: "서버 에러로 데이터를 불러오지 못했습니다." });
+    res.status(500).json({ message: "서버 에러로 프로젝트를 불러오지 못했습니다." });
   }
 });
 
@@ -32,7 +32,7 @@ projectsRouter.get("/:projectId", async (req, res) => {
     res.status(200).json(project);
   } catch (error) {
     console.error("프로젝트 상세 조회 중 에러 발생", error);
-    res.status(500).json({ message: "서버 에러로 데이터를 불러오지 못했습니다." });
+    res.status(500).json({ message: "서버 에러로 프로젝트 상세 정보를 불러오지 못했습니다." });
   }
 });
 
@@ -48,10 +48,10 @@ projectsRouter.post("/", async (req, res) => {
       updatedAt: currentDate,
     });
 
-    res.status(200).json(newProject);
+    res.status(201).json(newProject);
   } catch (error) {
     console.error("프로젝트 생성 중 에러 발생", error);
-    res.status(500).json({ message: "서버 에러로 데이터를 저장하지 못했습니다." });
+    res.status(500).json({ message: "서버 에러로 프로젝트를 저장하지 못했습니다." });
   }
 });
 
@@ -69,7 +69,7 @@ projectsRouter.delete("/:projectId", async (req, res) => {
     });
   } catch (error) {
     console.error("프로젝트 삭제 중 에러 발생", error);
-    res.status(500).json({ message: "서버 에러로 데이터를 삭제하지 못했습니다." });
+    res.status(500).json({ message: "서버 에러로 프로젝트를 삭제하지 못했습니다." });
   }
 });
 
@@ -89,13 +89,13 @@ projectsRouter.patch("/:projectId", async (req, res) => {
     );
 
     if (!updatedProject) {
-      return res.status(404).json({ message: "프로젝트가 없습니다." });
+      return res.status(404).json({ message: "요청한 프로젝트가 없습니다." });
     }
 
     return res.status(200).json(updatedProject);
   } catch (err) {
     console.error("프로젝트 수정 실패:", err);
-    return res.status(500).json({ message: "서버 에러 입니다." });
+    return res.status(500).json({ message: "서버 에러로 프로젝트 타이틀 수정에 실패했습니다." });
   }
 });
 
