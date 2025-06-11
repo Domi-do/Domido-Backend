@@ -13,7 +13,7 @@ export const OBJECT_NAMES = [
   "soccerFootball",
   "lightbulb",
   "bumper",
-  "car",
+  "steelBall",
 ];
 
 export const COLLIDERS = ["cuboid", "trimesh", "ball", "hull"];

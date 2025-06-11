@@ -34,6 +34,10 @@ const objectInfoSchema = new Schema({
     enum: GROUP_NAMES,
     required: true,
   },
+  title: {
+    type: String,
+    required: true,
+  },
 });
 
 export default objectInfoSchema;
