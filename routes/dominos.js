@@ -15,7 +15,7 @@ dominosRouter.get("/:projectId", async (req, res) => {
     return res.status(200).json(dominos);
   } catch (error) {
     console.error("도미노 조회 중 에러 발생", error);
-    return res.status(500).json({ message: "서버 에러로 데이터를 불러오지 못했습니다." });
+    return res.status(500).json({ message: "서버 에러로 도미노 데이터를 불러오지 못했습니다." });
   }
 });
 
@@ -25,7 +25,7 @@ dominosRouter.post("/:projectId", async (req, res) => {
     const { dominos } = req.body;
 
     if (!Array.isArray(dominos)) {
-      return res.status(400).json({ message: "유효하지 않은 요청입니다." });
+      return res.status(400).json({ message: "dominos'는 배열이어야 합니다" });
     }
 
     await DominoModel.deleteMany({ projectId });
@@ -45,7 +45,7 @@ dominosRouter.post("/:projectId", async (req, res) => {
     return res.status(200).json(finalDominos);
   } catch (error) {
     console.error("도미노 처리 중 에러 발생:", error);
-    return res.status(500).json({ message: "서버 에러로 도미노 작업을 처리하지 못했습니다." });
+    return res.status(500).json({ message: "서버 에러로 도미노 저장에 실패했습니다." });
   }
 });
 
