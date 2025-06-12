@@ -4,7 +4,7 @@ import User from "../Models/UserInfoSchema.js";
 
 export const generateAccessToken = (payload) =>
   jwt.sign({ ...payload, tokenType: "access" }, process.env.JWT_SECRET, {
-    expiresIn: "10m",
+    expiresIn: "6h",
   });
 
 export const generateRefreshToken = (payload) =>
