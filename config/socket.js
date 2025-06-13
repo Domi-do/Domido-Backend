@@ -51,6 +51,7 @@ const socketSetup = (server) => {
       io.to(room).emit("domino update", {
         userNickname,
         dominos,
+        sendUser: userID,
       });
     });
 
