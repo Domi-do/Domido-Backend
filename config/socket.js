@@ -26,7 +26,7 @@ const socketSetup = (server) => {
       socket.join(room);
       socket.data.projectId = projectId;
 
-      io.to(room).emit("user joined", {
+      socket.to(room).emit("user joined", {
         message: `${userNickname}님이 방에 입장했습니다.`,
       });
     });
@@ -35,7 +35,7 @@ const socketSetup = (server) => {
       "update cursor position",
       ({ projectId, objectInfo, position, selectedColor, rotationY }) => {
         const room = `project:${projectId}`;
-        io.to(room).emit("cursor position update", {
+        socket.to(room).emit("cursor position update", {
           userNickname,
           objectInfo,
           position,
@@ -48,23 +48,22 @@ const socketSetup = (server) => {
 
     socket.on("update domino", ({ projectId, dominos }) => {
       const room = `project:${projectId}`;
-      io.to(room).emit("domino update", {
+      socket.to(room).emit("domino update", {
         userNickname,
         dominos,
-        sendUser: userID,
       });
     });
 
     socket.on("clear cursor", ({ projectId }) => {
-      io.to(`project:${projectId}`).emit("other cursor clear", { userID });
+      socket.to(`project:${projectId}`).emit("other cursor clear", { userID });
     });
 
     socket.on("clear domino", ({ projectId }) => {
-      io.to(`project:${projectId}`).emit("domino cleared", { projectId });
+      socket.to(`project:${projectId}`).emit("domino cleared", { projectId });
     });
 
     socket.on("reset domino", ({ projectId }) => {
-      io.to(`project:${projectId}`).emit("reset domino");
+      socket.to(`project:${projectId}`).emit("reset domino");
     });
 
     socket.on("disconnect", () => {
