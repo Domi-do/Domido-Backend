@@ -8,6 +8,7 @@ const userInfoSchema = new Schema({
   },
   refreshToken: { type: String, default: null },
   accessToken: { type: String, default: null },
+  isTutorialUser: { type: Boolean, default: true },
 });
 
 const User = mongoose.model("user", userInfoSchema);
