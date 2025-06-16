@@ -1,7 +1,6 @@
 export const OBJECT_NAMES = [
   "defaultObject",
   "slide",
-  "spiralStairs",
   "staircase",
   "stairsClosedShort",
   "stairsClosed",
