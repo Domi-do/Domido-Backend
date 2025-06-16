@@ -87,7 +87,7 @@ router.post("/login", async (req, res) => {
       refreshToken: refreshToken,
       userNickname,
       kakaoAccessToken: kakaoAccessToken,
-      isTutorialUser: true,
+      isTutorialUser: user.isTutorialUser,
     });
   } catch (err) {
     console.error("로그인 처리 실패:", err.message);
