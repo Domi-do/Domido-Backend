@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 
 import User from "../Models/UserInfoSchema.js";
 import { generateAccessToken, generateRefreshToken } from "../utills/utills.js";
+import { verifyAccessToken } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
@@ -86,6 +87,7 @@ router.post("/login", async (req, res) => {
       refreshToken: refreshToken,
       userNickname,
       kakaoAccessToken: kakaoAccessToken,
+      isTutorialUser: true,
     });
   } catch (err) {
     console.error("로그인 처리 실패:", err.message);
@@ -144,6 +146,28 @@ router.post("/logout", async (req, res) => {
   } catch (err) {
     console.error("토큰 삭제 실패", err);
     res.status(500).json({ message: "서버 에러: 토큰 삭제 중 에러" });
+  }
+});
+
+router.patch("/me/tutorial", verifyAccessToken, async (req, res) => {
+  const kakaoId = req.user.userId;
+  const { isTutorialUser } = req.body;
+
+  try {
+    const updatedUser = await User.findOneAndUpdate(
+      { kakaoId },
+      { isTutorialUser },
+      { new: true, runValidators: true },
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
+    }
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("사용자 정보 업데이트 실패:", error);
+    res.status(500).json({ message: "사용자 정보 수정 중 오류가 발생했습니다." });
   }
 });
 
