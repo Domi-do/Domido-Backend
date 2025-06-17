@@ -9,6 +9,7 @@ import dominosRouter from "./routes/dominos.js";
 import projectsRouter from "./routes/projects.js";
 import authRouter from "./routes/user.js";
 import socketSetup from "./config/socket.js";
+import achievement from "./routes/achievements.js";
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.get("/", (req, res) => {
 app.use("/projects", projectsRouter);
 app.use("/dominos", dominosRouter);
 app.use("/auth", authRouter);
+app.use("/achievements", achievement);
 
 server.listen(PORT, () => {
   console.log(`App + Socket.IO listening on port ${PORT}`);
