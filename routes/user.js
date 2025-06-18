@@ -105,6 +105,7 @@ router.post("/login", async (req, res) => {
 
     if (!user) {
       user = await User.create({ kakaoId, userNickname, accessToken, refreshToken });
+      await createPresetProjects(kakaoId);
     } else {
       user.accessToken = accessToken;
       user.refreshToken = refreshToken;
