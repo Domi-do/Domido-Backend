@@ -2,6 +2,7 @@ import express from "express";
 
 import { ProjectModel } from "../Models/ProjectSchema.js";
 import { DominoModel } from "../Models/DominosSchema.js";
+import { createProject } from "../utills/utills.js";
 import { verifyAccessToken } from "../middlewares/authMiddleware.js";
 
 const projectsRouter = express.Router();
@@ -39,14 +40,8 @@ projectsRouter.get("/:projectId", async (req, res) => {
 projectsRouter.post("/", async (req, res) => {
   try {
     const user = req.user;
-    const currentDate = new Date();
-
-    const newProject = await ProjectModel.create({
-      title: req.body.title,
-      ownerId: user.userId,
-      createdAt: currentDate,
-      updatedAt: currentDate,
-    });
+    const title = req.body.title;
+    const newProject = await createProject({ title, ownerId: user.userId });
 
     res.status(201).json(newProject);
   } catch (error) {

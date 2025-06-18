@@ -2,8 +2,14 @@ import express from "express";
 import jwt from "jsonwebtoken";
 
 import User from "../Models/UserInfoSchema.js";
-import { generateAccessToken, generateRefreshToken } from "../utills/utills.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  createProject,
+  insertDominos,
+} from "../utills/utills.js";
 import { verifyAccessToken } from "../middlewares/authMiddleware.js";
+import { presetDominos } from "../constants/presetDominos.js";
 
 const router = express.Router();
 
@@ -49,6 +55,31 @@ async function getKakaoUserInfo(accessToken) {
   const userInfo = await response.json();
   return userInfo;
 }
+
+export const createPresetProjects = async (ownerId) => {
+  const presetTitles = ["프리셋 1", "프리셋 2", "프리셋 3"];
+
+  try {
+    const createdProjects = await Promise.all(
+      presetTitles.map((title) => createProject({ title, ownerId })),
+    );
+
+    await Promise.all(
+      createdProjects.map(async (project) => {
+        const dominos = presetDominos[project.title] || [];
+        // eslint-disable-next-line no-unused-vars
+        const dominosToInsert = dominos.map(({ _id, ...rest }) => ({
+          ...rest,
+          projectId: project.id,
+        }));
+        await insertDominos(project.id, dominosToInsert);
+      }),
+    );
+  } catch (error) {
+    console.error("프리셋 프로젝트 생성 중 오류 발생:", error);
+    throw new Error("기본 프로젝트 생성에 실패했습니다.");
+  }
+};
 
 router.post("/login", async (req, res) => {
   const { code } = req.body;
