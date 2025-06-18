@@ -26,6 +26,10 @@ const socketSetup = (server) => {
       socket.join(room);
       socket.data.projectId = projectId;
 
+      socket.to(room).emit("sync domino request", {
+        requesterId: socket.id,
+      });
+
       socket.to(room).emit("user joined", {
         message: `${userNickname}님이 방에 입장했습니다.`,
       });
@@ -46,11 +50,10 @@ const socketSetup = (server) => {
       },
     );
 
-    socket.on("update domino", ({ projectId, dominos }) => {
+    socket.on("update domino", ({ projectId }) => {
       const room = `project:${projectId}`;
       socket.to(room).emit("domino update", {
         userNickname,
-        dominos,
       });
     });
 
@@ -62,8 +65,10 @@ const socketSetup = (server) => {
       socket.to(`project:${projectId}`).emit("domino cleared", { projectId });
     });
 
-    socket.on("reset domino", ({ projectId, dominos }) => {
-      io.to(`project:${projectId}`).emit("reset domino", { dominos });
+    socket.on("reset domino", ({ projectId, senderId }) => {
+      io.to(`project:${projectId}`).emit("reset domino", {
+        senderId,
+      });
     });
 
     socket.on("disconnect", () => {
