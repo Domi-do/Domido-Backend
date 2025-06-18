@@ -85,8 +85,9 @@ dominosRouter.post("/:projectId/overwrite", async (req, res) => {
 
     await DominoModel.deleteMany({ projectId });
 
-    const dominosToInsert = dominos.map((domino) => ({
-      ...domino,
+    // eslint-disable-next-line no-unused-vars
+    const dominosToInsert = dominos.map(({ _id, ...rest }) => ({
+      ...rest,
       projectId,
     }));
 
