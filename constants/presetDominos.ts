@@ -1,4 +1,6 @@
-export const presetDominos = {
+import { PresetDomino } from "types/presetDomino";
+
+export const presetDominos: Record<string, PresetDomino[]> = {
   "프리셋 1": [
     {
       position: [-7.442173284606596, -8.881784197001252e-16, 17.113350661918044],

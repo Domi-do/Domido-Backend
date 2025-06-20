@@ -14,10 +14,10 @@ export const OBJECT_NAMES = [
   "bumper",
   "steelBall",
   "rainbowSlide",
-];
+] as const;
 
-export const COLLIDERS = ["cuboid", "trimesh", "ball", "hull"];
+export const COLLIDERS = ["cuboid", "trimesh", "ball", "hull"] as const;
 
-export const GROUP_NAMES = ["STATIC_OBJECTS", "DYNAMIC_OBJECTS"];
+export const GROUP_NAMES = ["STATIC_OBJECTS", "DYNAMIC_OBJECTS"] as const;
 
-export const TYPE = ["dynamic", "fixed"];
+export const TYPE = ["dynamic", "fixed"] as const;

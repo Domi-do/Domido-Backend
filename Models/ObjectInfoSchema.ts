@@ -1,6 +1,6 @@
 import { Schema } from "mongoose";
 
-import { OBJECT_NAMES, COLLIDERS, GROUP_NAMES, TYPE } from "../constants/index.js";
+import { OBJECT_NAMES, COLLIDERS, GROUP_NAMES, TYPE } from "../constants/index";
 
 const objectInfoSchema = new Schema({
   objectName: {

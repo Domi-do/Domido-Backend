@@ -1,18 +1,23 @@
 import express from "express";
 
-import { ProjectModel } from "../Models/ProjectSchema.js";
-import { DominoModel } from "../Models/DominosSchema.js";
-import { createProject } from "../utills/utills.js";
-import { verifyAccessToken } from "../middlewares/authMiddleware.js";
+import { ProjectModel } from "../Models/ProjectSchema";
+import { DominoModel } from "../Models/DominosSchema";
+import { createProject } from "utils/utils";
+import { verifyAccessToken } from "../middlewares/authMiddleware";
+import { Request, Response, NextFunction } from "express";
+
+export interface AuthenticatedRequest extends Request {
+  user?: string | undefined;
+}
 
 const projectsRouter = express.Router();
 
 projectsRouter.use(verifyAccessToken);
 
-projectsRouter.get("/", async (req, res) => {
+projectsRouter.get("/", async (req: AuthenticatedRequest, res) => {
   try {
     const user = req.user;
-    const projects = await ProjectModel.find({ ownerId: user.userId });
+    const projects = await ProjectModel.find({ ownerId: (user as any).userId });
 
     res.status(200).json(projects);
   } catch (error) {
@@ -27,7 +32,8 @@ projectsRouter.get("/:projectId", async (req, res) => {
     const project = await ProjectModel.findOne({ _id: projectId });
 
     if (!project) {
-      return res.status(404).json({ message: "일치하는 프로젝트가 없습니다." });
+      res.status(404).json({ message: "일치하는 프로젝트가 없습니다." });
+      return;
     }
 
     res.status(200).json(project);
@@ -37,11 +43,11 @@ projectsRouter.get("/:projectId", async (req, res) => {
   }
 });
 
-projectsRouter.post("/", async (req, res) => {
+projectsRouter.post("/", async (req: AuthenticatedRequest, res) => {
   try {
     const user = req.user;
     const title = req.body.title;
-    const newProject = await createProject({ title, ownerId: user.userId });
+    const newProject = await createProject({ title, ownerId: (user as any).userId });
 
     res.status(201).json(newProject);
   } catch (error) {
@@ -73,20 +79,28 @@ projectsRouter.patch("/:projectId", async (req, res) => {
   const { projectId } = req.params;
 
   if (!title) {
-    return res.status(400).json({ message: "프로젝트 제목이 필요합니다." });
+    res.status(400).json({ message: "프로젝트 제목이 필요합니다." });
+    return;
   }
 
   try {
-    const updatedProject = await ProjectModel.findByIdAndUpdate(projectId, { title }, { new: true });
+    const updatedProject = await ProjectModel.findByIdAndUpdate(
+      projectId,
+      { title },
+      { new: true },
+    );
 
     if (!updatedProject) {
-      return res.status(404).json({ message: "요청한 프로젝트가 없습니다." });
+      res.status(404).json({ message: "요청한 프로젝트가 없습니다." });
+      return;
     }
 
-    return res.status(200).json(updatedProject);
+    res.status(200).json(updatedProject);
+    return;
   } catch (err) {
     console.error("프로젝트 수정 실패:", err);
-    return res.status(500).json({ message: "서버 에러로 프로젝트 타이틀 수정에 실패했습니다." });
+    res.status(500).json({ message: "서버 에러로 프로젝트 타이틀 수정에 실패했습니다." });
+    return;
   }
 });
 
