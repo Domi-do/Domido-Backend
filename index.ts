@@ -4,12 +4,12 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 
-import connectDB from "./config/db.js";
-import dominosRouter from "./routes/dominos.js";
-import projectsRouter from "./routes/projects.js";
-import authRouter from "./routes/user.js";
-import socketSetup from "./config/socket.js";
-import achievement from "./routes/achievements.js";
+import connectDB from "./config/db";
+import dominosRouter from "./routes/dominos";
+import projectsRouter from "./routes/projects";
+import authRouter from "./routes/user";
+import socketSetup from "./config/socket";
+import achievement from "./routes/achievements";
 
 dotenv.config();
 
