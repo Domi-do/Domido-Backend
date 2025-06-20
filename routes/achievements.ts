@@ -9,10 +9,16 @@ router.post("/", async (req, res) => {
 
   try {
     const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
 
     const dup = user.achievements.some((a) => a.name === name);
-    if (dup) return res.sendStatus(200);
+    if (dup) {
+      res.sendStatus(200);
+      return;
+    }
 
     user.achievements.push({ name, achieved: true, date: new Date() });
     await user.save();
