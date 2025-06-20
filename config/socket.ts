@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
+import { Server as HttpServer } from "http";
 
-const socketSetup = (server) => {
+const socketSetup = (server: HttpServer) => {
   const io = new Server(server, {
     cors: {
       origin: process.env.FRONT_END_URL,

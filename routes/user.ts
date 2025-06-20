@@ -1,5 +1,5 @@
 import express from "express";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 import User from "../Models/UserInfoSchema.js";
 import {
@@ -7,17 +7,19 @@ import {
   generateRefreshToken,
   createProject,
   insertDominos,
-} from "../utills/utills.js";
-import { verifyAccessToken } from "../middlewares/authMiddleware.js";
-import { presetDominos } from "../constants/presetDominos.js";
+} from "../utils/utils";
+import { verifyAccessToken } from "../middlewares/authMiddleware";
+import { presetDominos } from "../constants/presetDominos";
+import { AuthenticatedRequest } from "types/AuthenticatedRequest.js";
+import { DominoType } from "types/domino.js";
 
 const router = express.Router();
 
-async function getKakaoAccessToken(code) {
+async function getKakaoAccessToken(code: string) {
   const params = new URLSearchParams();
   params.append("grant_type", "authorization_code");
-  params.append("client_id", process.env.KAKAO_REST_API_KEY);
-  params.append("redirect_uri", process.env.KAKAO_REDIRECT_URI);
+  params.append("client_id", process.env.KAKAO_REST_API_KEY!);
+  params.append("redirect_uri", process.env.KAKAO_REDIRECT_URI!);
   params.append("code", code);
 
   const response = await fetch("https://kauth.kakao.com/oauth/token", {
@@ -38,7 +40,7 @@ async function getKakaoAccessToken(code) {
   return data.access_token;
 }
 
-async function getKakaoUserInfo(accessToken) {
+async function getKakaoUserInfo(accessToken: string) {
   const response = await fetch("https://kapi.kakao.com/v2/user/me", {
     method: "GET",
     headers: {
@@ -56,7 +58,7 @@ async function getKakaoUserInfo(accessToken) {
   return userInfo;
 }
 
-export const createPresetProjects = async (ownerId) => {
+export const createPresetProjects = async (ownerId: string) => {
   const presetTitles = ["프리셋 1", "프리셋 2", "프리셋 3"];
 
   try {
@@ -66,9 +68,11 @@ export const createPresetProjects = async (ownerId) => {
 
     await Promise.all(
       createdProjects.map(async (project) => {
-        const dominos = presetDominos[project.title] || [];
+         const title = project.title;
+        if (typeof title !== "string") return;
+        const dominos = presetDominos[title] || [];
         // eslint-disable-next-line no-unused-vars
-        const dominosToInsert = dominos.map(({ _id, ...rest }) => ({
+        const dominosToInsert: DominoType[] = dominos.map(({ _id, ...rest }) => ({
           ...rest,
           projectId: project.id,
         }));
@@ -85,7 +89,8 @@ router.post("/login", async (req, res) => {
   const { code } = req.body;
 
   if (!code) {
-    return res.status(400).json({ message: "인가 코드가 없습니다." });
+    res.status(400).json({ message: "인가 코드가 없습니다." });
+    return;
   }
 
   try {
@@ -93,7 +98,8 @@ router.post("/login", async (req, res) => {
     const userInfo = await getKakaoUserInfo(kakaoAccessToken);
 
     if (!userInfo || !userInfo.id) {
-      return res.status(502).json({ message: "카카오 사용자 정보가 없습니다." });
+      res.status(502).json({ message: "카카오 사용자 정보가 없습니다." });
+      return;
     }
     const kakaoId = userInfo.id;
     const userNickname = userInfo.properties.nickname;
@@ -121,34 +127,47 @@ router.post("/login", async (req, res) => {
       isTutorialUser: user.isTutorialUser,
     });
   } catch (err) {
-    console.error("로그인 처리 실패:", err.message);
-    res.status(500).json({ message: `카카오 로그인 실패: ${err}` });
+    if (err instanceof Error) {
+      res.status(500).json({ message: `카카오 로그인 실패: ${err}` });
+      console.error("로그인 처리 실패:", err.message);
+    }
   }
 });
+
+interface RefreshTokenPayload extends JwtPayload {
+  userId: string;
+}
 
 router.post("/refresh", async (req, res) => {
   const { refreshToken } = req.body;
 
   if (!refreshToken) {
-    return res.status(401).json({ message: "리프레시 토큰이 없습니다." });
+    res.status(401).json({ message: "리프레시 토큰이 없습니다." });
+    return;
   }
   try {
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.JWT_REFRESH_SECRET!,
+    ) as RefreshTokenPayload;
 
     const user = await User.findOne({ kakaoId: decoded.userId });
     if (!user) {
-      return res.status(404).json({ message: "사용자가 없습니다." });
+      res.status(404).json({ message: "사용자가 없습니다." });
+      return;
     }
 
     const newAccessToken = generateAccessToken({ userId: user.kakaoId });
 
-    return res.status(200).json({
+    res.status(200).json({
       message: "새 액세스 토큰 발급 완료",
       token: newAccessToken,
     });
+    return;
   } catch (err) {
-    console.err(err);
-    return res.status(403).json({ message: "리프레시 토큰이 유효하지 않습니다." });
+    console.log(err);
+    res.status(403).json({ message: "리프레시 토큰이 유효하지 않습니다." });
+    return;
   }
 });
 
@@ -156,7 +175,8 @@ router.post("/logout", async (req, res) => {
   const { accessToken } = req.body;
 
   if (!accessToken) {
-    return res.status(400).json({ message: "액세스 토큰이 없습니다." });
+    res.status(400).json({ message: "액세스 토큰이 없습니다." });
+    return;
   }
 
   const response = await fetch("https://kapi.kakao.com/v1/user/unlink", {
@@ -168,7 +188,8 @@ router.post("/logout", async (req, res) => {
   });
   if (!response.ok) {
     const error = await response.text();
-    return res.status(502).json({ message: `카카오 로그아웃 실패: ${error}` });
+    res.status(502).json({ message: `카카오 로그아웃 실패: ${error}` });
+    return;
   }
 
   try {
@@ -180,26 +201,35 @@ router.post("/logout", async (req, res) => {
   }
 });
 
-router.patch("/me/tutorial", verifyAccessToken, async (req, res) => {
-  const kakaoId = req.user.userId;
-  const { isTutorialUser } = req.body;
+interface TutorialPatchBody {
+  isTutorialUser: boolean;
+}
 
-  try {
-    const updatedUser = await User.findOneAndUpdate(
-      { kakaoId },
-      { isTutorialUser },
-      { new: true, runValidators: true },
-    );
+router.patch(
+  "/me/tutorial",
+  verifyAccessToken,
+  async (req: AuthenticatedRequest<TutorialPatchBody>, res) => {
+    const kakaoId = req.user?.userId;
+    const { isTutorialUser } = req.body;
 
-    if (!updatedUser) {
-      return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
+    try {
+      const updatedUser = await User.findOneAndUpdate(
+        { kakaoId },
+        { isTutorialUser },
+        { new: true, runValidators: true },
+      );
+
+      if (!updatedUser) {
+        res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
+        return;
+      }
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      console.error("사용자 정보 업데이트 실패:", error);
+      res.status(500).json({ message: "사용자 정보 수정 중 오류가 발생했습니다." });
     }
-
-    res.status(200).json(updatedUser);
-  } catch (error) {
-    console.error("사용자 정보 업데이트 실패:", error);
-    res.status(500).json({ message: "사용자 정보 수정 중 오류가 발생했습니다." });
-  }
-});
+  },
+);
 
 export default router;

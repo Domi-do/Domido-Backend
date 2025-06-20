@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "prepare": "husky install",
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "tsx watch index.ts",
+    "start": "tsx index.ts"
   },
   "lint-staged": {
     "**/*.js": [
@@ -19,6 +19,9 @@
   "license": "ISC",
   "devDependencies": {
     "@eslint/js": "^9.28.0",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^24.0.3",
     "eslint": "^9.28.0",
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-plugin-import": "^2.31.0",
@@ -26,7 +29,10 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.1.0",
     "nodemon": "^3.1.10",
-    "prettier": "^3.5.3"
+    "prettier": "^3.5.3",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
     "body-parser": "^2.2.0",
