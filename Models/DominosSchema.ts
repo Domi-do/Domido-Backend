@@ -1,18 +1,18 @@
 import mongoose, { Schema } from "mongoose";
 
-import objectInfoSchema from "./ObjectInfoSchema.js";
+import objectInfoSchema from "./ObjectInfoSchema";
 
 const dominosSchema = new Schema({
   projectId: { type: String },
   position: {
     type: [Number],
     required: true,
-    validate: { validator: (arr) => arr.length === 3 },
+    validate: { validator: (arr: number[]) => arr.length === 3 },
   },
   rotation: {
     type: [Number],
     required: true,
-    validate: { validator: (arr) => arr.length === 3 },
+    validate: { validator: (arr: number[]) => arr.length === 3 },
   },
   opacity: {
     type: Number,

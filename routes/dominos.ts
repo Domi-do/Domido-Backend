@@ -1,7 +1,7 @@
 import express from "express";
 
-import { DominoModel } from "../Models/DominosSchema.js";
-import { verifyAccessToken } from "../middlewares/authMiddleware.js";
+import { DominoModel } from "../Models/DominosSchema";
+import { verifyAccessToken } from "../middlewares/authMiddleware";
 
 const dominosRouter = express.Router();
 
@@ -12,10 +12,12 @@ dominosRouter.get("/:projectId", async (req, res) => {
     const { projectId } = req.params;
     const dominos = await DominoModel.find({ projectId }).lean();
 
-    return res.status(200).json(dominos);
+    res.status(200).json(dominos);
+    return;
   } catch (error) {
     console.error("도미노 조회 중 에러 발생", error);
-    return res.status(500).json({ message: "서버 에러로 도미노 데이터를 불러오지 못했습니다." });
+    res.status(500).json({ message: "서버 에러로 도미노 데이터를 불러오지 못했습니다." });
+    return;
   }
 });
 
@@ -25,12 +27,14 @@ dominosRouter.post("/:projectId", async (req, res) => {
     const { dominos } = req.body;
 
     if (!Array.isArray(dominos)) {
-      return res.status(400).json({ message: "dominos'는 배열이어야 합니다" });
+      res.status(400).json({ message: "dominos'는 배열이어야 합니다" });
+      return;
     }
 
     if (dominos.length === 0) {
       await DominoModel.deleteMany({ projectId });
-      return res.status(200).json([]);
+      res.status(200).json([]);
+      return;
     }
 
     const databaseDominos = await DominoModel.find({ projectId }).lean();
@@ -67,10 +71,12 @@ dominosRouter.post("/:projectId", async (req, res) => {
     await DominoModel.bulkWrite([...deleteOps, ...upsertOps]);
 
     const finalDominos = await DominoModel.find({ projectId }).lean();
-    return res.status(200).json(finalDominos);
+    res.status(200).json(finalDominos);
+    return;
   } catch (error) {
     console.error("도미노 처리 중 에러 발생:", error);
-    return res.status(500).json({ message: "서버 에러로 도미노 저장에 실패했습니다." });
+    res.status(500).json({ message: "서버 에러로 도미노 저장에 실패했습니다." });
+    return;
   }
 });
 
@@ -80,7 +86,8 @@ dominosRouter.post("/:projectId/overwrite", async (req, res) => {
     const { dominos } = req.body;
 
     if (!Array.isArray(dominos)) {
-      return res.status(400).json({ message: "'dominos'는 배열이어야 합니다." });
+      res.status(400).json({ message: "'dominos'는 배열이어야 합니다." });
+      return;
     }
 
     await DominoModel.deleteMany({ projectId });
@@ -93,10 +100,12 @@ dominosRouter.post("/:projectId/overwrite", async (req, res) => {
 
     const insertedDominos = await DominoModel.insertMany(dominosToInsert);
 
-    return res.status(200).json(insertedDominos);
+    res.status(200).json(insertedDominos);
+    return;
   } catch (error) {
     console.error("도미노 덮어쓰기 중 에러:", error);
-    return res.status(500).json({ message: "도미노 덮어쓰기에 실패했습니다." });
+    res.status(500).json({ message: "도미노 덮어쓰기에 실패했습니다." });
+    return;
   }
 });
 
