@@ -3,6 +3,7 @@ import mongoose, { Schema } from "mongoose";
 import objectInfoSchema from "./ObjectInfoSchema";
 
 const dominosSchema = new Schema({
+  _id: { type: String, required: true },
   projectId: { type: String },
   position: {
     type: [Number],
