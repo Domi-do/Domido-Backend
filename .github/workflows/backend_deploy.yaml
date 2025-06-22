@@ -39,6 +39,12 @@ jobs:
             
             npm install
             
-            pm2 restart all
+            if pm2 list | grep -q domido-backend; then
+              pm2 restart domido-backend
+            else
+              pm2 start npm --name domido-backend -- start
+            fi
+
+            pm2 save
           EOF
           
