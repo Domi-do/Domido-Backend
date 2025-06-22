@@ -27,56 +27,44 @@ dominosRouter.post("/:projectId", async (req, res) => {
     const { dominos } = req.body;
 
     if (!Array.isArray(dominos)) {
-      res.status(400).json({ message: "dominos'는 배열이어야 합니다" });
-      return;
+      res.status(400).json({ message: "dominos는 배열이어야 합니다." });
+      return
     }
 
     if (dominos.length === 0) {
       await DominoModel.deleteMany({ projectId });
       res.status(200).json([]);
-      return;
+      return
     }
 
     const databaseDominos = await DominoModel.find({ projectId }).lean();
-    const clientDominoIds = dominos.map((domino) => domino._id).filter(Boolean);
+    const clientDominoIds = dominos.map((d) => d._id).filter(Boolean);
 
     const deleteOps = databaseDominos
-      .filter((domino) => !clientDominoIds.includes(String(domino._id)))
-      .map((domino) => ({
+      .filter((d) => !clientDominoIds.includes(String(d._id)))
+      .map((d) => ({
         deleteOne: {
-          filter: { _id: domino._id },
+          filter: { _id: d._id },
         },
       }));
 
-    const upsertOps = dominos.map((domino) => {
-      const { _id, ...rest } = domino;
-
-      if (_id) {
-        return {
-          replaceOne: {
-            filter: { _id },
-            replacement: { ...rest, _id, projectId },
-            upsert: true,
-          },
-        };
-      }
-
-      return {
-        insertOne: {
-          document: { ...rest, projectId },
-        },
-      };
-    });
+    const upsertOps = dominos.map((domino) => ({
+      replaceOne: {
+        filter: { _id: domino._id },
+        replacement: { ...domino, projectId },
+        upsert: true,
+      },
+    }));
 
     await DominoModel.bulkWrite([...deleteOps, ...upsertOps]);
 
     const finalDominos = await DominoModel.find({ projectId }).lean();
     res.status(200).json(finalDominos);
-    return;
+    return
   } catch (error) {
     console.error("도미노 처리 중 에러 발생:", error);
     res.status(500).json({ message: "서버 에러로 도미노 저장에 실패했습니다." });
-    return;
+    return
   }
 });
 
