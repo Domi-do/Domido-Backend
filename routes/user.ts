@@ -9,9 +9,11 @@ import {
   insertDominos,
 } from "../utils/utils";
 import { verifyAccessToken } from "../middlewares/authMiddleware";
-import { presetDominos } from "../constants/presetDominos";
+import presetDominos from "../presetData/presetDominosWithId.json";
 import { AuthenticatedRequest } from "types/AuthenticatedRequest.js";
 import { DominoType } from "types/domino.js";
+
+type PresetTitle = keyof typeof presetDominos;
 
 const router = express.Router();
 
@@ -59,7 +61,7 @@ async function getKakaoUserInfo(accessToken: string) {
 }
 
 export const createPresetProjects = async (ownerId: string) => {
-  const presetTitles = ["프리셋 1", "프리셋 2", "프리셋 3"];
+  const presetTitles: PresetTitle[] = ["프리셋 1"];
 
   try {
     const createdProjects = await Promise.all(
@@ -68,14 +70,25 @@ export const createPresetProjects = async (ownerId: string) => {
 
     await Promise.all(
       createdProjects.map(async (project) => {
-         const title = project.title;
-        if (typeof title !== "string") return;
-        const dominos = presetDominos[title] || [];
-        // eslint-disable-next-line no-unused-vars
-        const dominosToInsert: DominoType[] = dominos.map(({ _id, ...rest }) => ({
-          ...rest,
-          projectId: project.id,
-        }));
+        const title = project.title as PresetTitle;
+        const dominos = presetDominos[title];
+
+        if (!Array.isArray(dominos)) return;
+
+        const dominosToInsert: DominoType[] = dominos.map((domino) => {
+          const { objectInfo, ...rest } = domino;
+
+          return {
+            ...rest,
+            projectId: project.id,
+            objectInfo: {
+              ...objectInfo,
+              groupName: objectInfo.groupName as "STATIC_OBJECTS" | "DYNAMIC_OBJECTS",
+              type: objectInfo.type as "dynamic" | "fixed",
+            },
+          };
+        });
+
         await insertDominos(project.id, dominosToInsert);
       }),
     );
@@ -111,6 +124,7 @@ router.post("/login", async (req, res) => {
 
     if (!user) {
       user = await User.create({ kakaoId, userNickname, accessToken, refreshToken });
+      await createPresetProjects(kakaoId);
     } else {
       user.accessToken = accessToken;
       user.refreshToken = refreshToken;
