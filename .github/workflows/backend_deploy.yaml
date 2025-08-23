@@ -40,10 +40,10 @@ jobs:
             
             npm install
             
-            if pm2 list | grep -q domido-backend; then
-              pm2 restart domido-backend
+            if pm2 list | grep -q domido-server; then
+              pm2 restart domido-server
             else
-              pm2 start npm --name domido-backend -- start
+              pm2 start npm --name domido-server -- start
             fi
 
             pm2 save
