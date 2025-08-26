@@ -10,14 +10,11 @@ const achievementItemSchema = new Schema(
 );
 
 const userInfoSchema = new Schema({
-  kakaoId: {
-    type: String,
-    required: true,
-    unique: true,
-  },
+  kakaoId: { type: String, unique: true, sparse: true },
   refreshToken: { type: String, default: null },
   accessToken: { type: String, default: null },
   isTutorialUser: { type: Boolean, default: true },
+  isMember: { type: Boolean, default: false, required: true },
   achievements: { type: [achievementItemSchema], default: [] },
 });
 
