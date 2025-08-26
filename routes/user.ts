@@ -2,18 +2,7 @@ import express from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
 import User from "../Models/UserInfoSchema.js";
-import {
-  generateAccessToken,
-  generateRefreshToken,
-  createProject,
-  insertDominos,
-} from "../utils/utils";
-import { verifyAccessToken } from "../middlewares/authMiddleware";
-import presetDominos from "../presetData/presetDominosWithId.json";
-import { AuthenticatedRequest } from "types/AuthenticatedRequest.js";
-import { DominoType } from "types/domino.js";
-
-type PresetTitle = keyof typeof presetDominos;
+import { generateAccessToken, generateRefreshToken } from "../utils/utils";
 
 const router = express.Router();
 
@@ -60,43 +49,26 @@ async function getKakaoUserInfo(accessToken: string) {
   return userInfo;
 }
 
-export const createPresetProjects = async (ownerId: string) => {
-  const presetTitles: PresetTitle[] = ["프리셋 1"];
-
+router.post("/guest-login", async (req, res) => {
   try {
-    const createdProjects = await Promise.all(
-      presetTitles.map((title) => createProject({ title, ownerId })),
-    );
+    const user = await User.create({});
 
-    await Promise.all(
-      createdProjects.map(async (project) => {
-        const title = project.title as PresetTitle;
-        const dominos = presetDominos[title];
-
-        if (!Array.isArray(dominos)) return;
-
-        const dominosToInsert: DominoType[] = dominos.map((domino) => {
-          const { objectInfo, ...rest } = domino;
-
-          return {
-            ...rest,
-            projectId: project.id,
-            objectInfo: {
-              ...objectInfo,
-              groupName: objectInfo.groupName as "STATIC_OBJECTS" | "DYNAMIC_OBJECTS",
-              type: objectInfo.type as "dynamic" | "fixed",
-            },
-          };
-        });
-
-        await insertDominos(project.id, dominosToInsert);
-      }),
-    );
+    res.status(200).json({
+      message: "로그인에 성공했습니다.",
+      token: "",
+      userID: user._id,
+      refreshToken: "",
+      kakaoAccessToken: "",
+      isTutorialUser: user.isTutorialUser,
+      isMember: user.isMember,
+    });
   } catch (error) {
-    console.error("프리셋 프로젝트 생성 중 오류 발생:", error);
-    throw new Error("기본 프로젝트 생성에 실패했습니다.");
+    if (error instanceof Error) {
+      res.status(500).json({ message: `비회원 로그인 실패: ${error}` });
+      console.error("비회원 로그인 처리 실패:", error.message);
+    }
   }
-};
+});
 
 router.post("/login", async (req, res) => {
   const { code } = req.body;
@@ -123,8 +95,13 @@ router.post("/login", async (req, res) => {
     const refreshToken = generateRefreshToken({ userId: kakaoId, tokenType: "refresh" });
 
     if (!user) {
-      user = await User.create({ kakaoId, userNickname, accessToken, refreshToken });
-      await createPresetProjects(kakaoId);
+      user = await User.create({
+        kakaoId,
+        userNickname,
+        accessToken,
+        refreshToken,
+        isMember: true,
+      });
     } else {
       user.accessToken = accessToken;
       user.refreshToken = refreshToken;
@@ -139,6 +116,7 @@ router.post("/login", async (req, res) => {
       userNickname,
       kakaoAccessToken: kakaoAccessToken,
       isTutorialUser: user.isTutorialUser,
+      isMember: user.isMember,
     });
   } catch (err) {
     if (err instanceof Error) {
@@ -171,7 +149,7 @@ router.post("/refresh", async (req, res) => {
       return;
     }
 
-    const newAccessToken = generateAccessToken({ userId: user.kakaoId });
+    const newAccessToken = generateAccessToken({ userId: user.kakaoId! });
 
     res.status(200).json({
       message: "새 액세스 토큰 발급 완료",
@@ -215,35 +193,26 @@ router.post("/logout", async (req, res) => {
   }
 });
 
-interface TutorialPatchBody {
-  isTutorialUser: boolean;
-}
+router.patch("/me/tutorial", async (req, res) => {
+  const { userId, isTutorialUser } = req.body;
 
-router.patch(
-  "/me/tutorial",
-  verifyAccessToken,
-  async (req: AuthenticatedRequest<TutorialPatchBody>, res) => {
-    const kakaoId = req.user?.userId;
-    const { isTutorialUser } = req.body;
+  try {
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: userId },
+      { isTutorialUser },
+      { new: true, runValidators: true },
+    );
 
-    try {
-      const updatedUser = await User.findOneAndUpdate(
-        { kakaoId },
-        { isTutorialUser },
-        { new: true, runValidators: true },
-      );
-
-      if (!updatedUser) {
-        res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
-        return;
-      }
-
-      res.status(200).json(updatedUser);
-    } catch (error) {
-      console.error("사용자 정보 업데이트 실패:", error);
-      res.status(500).json({ message: "사용자 정보 수정 중 오류가 발생했습니다." });
+    if (!updatedUser) {
+      res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
+      return;
     }
-  },
-);
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("사용자 정보 업데이트 실패:", error);
+    res.status(500).json({ message: "사용자 정보 수정 중 오류가 발생했습니다." });
+  }
+});
 
 export default router;

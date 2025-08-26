@@ -4,6 +4,7 @@ import User from "../Models/UserInfoSchema.js";
 import { ProjectModel } from "../Models/ProjectSchema.js";
 import { DominoModel } from "../Models/DominosSchema.js";
 import { DominoType } from "types/domino.js";
+import { Types } from "mongoose";
 
 interface RefreshTokenPayload extends JwtPayload {
   userId: string;
@@ -30,7 +31,7 @@ export const refreshAccessToken = async (refreshToken: string) => {
 
     if (!user) throw new Error("사용자가 없습니다");
 
-    const newAccessToken = generateAccessToken({ userId: user.kakaoId });
+    const newAccessToken = generateAccessToken({ userId: user.kakaoId! });
     return newAccessToken;
   } catch (error) {
     if (error instanceof Error) {

@@ -7,6 +7,8 @@ import dotenv from "dotenv";
 import connectDB from "./config/db";
 import dominosRouter from "./routes/dominos";
 import projectsRouter from "./routes/projects";
+import guestProjectsRouter from "./routes/guestProjects";
+import guestDominoRouter from "./routes/guestDominos";
 import authRouter from "./routes/user";
 import socketSetup from "./config/socket";
 import achievement from "./routes/achievements";
@@ -35,8 +37,11 @@ app.get("/", (req, res) => {
   res.send("hello");
 });
 
+app.use("/guest/projects", guestProjectsRouter);
 app.use("/projects", projectsRouter);
+
 app.use("/dominos", dominosRouter);
+app.use("/guest/dominos", guestDominoRouter);
 app.use("/auth", authRouter);
 app.use("/achievements", achievement);
 
